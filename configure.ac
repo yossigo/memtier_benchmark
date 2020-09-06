@@ -82,7 +82,7 @@ PKG_CHECK_MODULES(LIBEVENT,
 # bash completion
 PKG_CHECK_MODULES([BASH_COMPLETION], [bash-completion >= 2.0],
     [BASH_COMPLETION_DIR="`pkg-config --variable=completionsdir bash-completion`"],
-    [BASH_COMPLETION_DIR="$datadir/bash-completion/completionsss"])
+    [BASH_COMPLETION_DIR="$datadir/bash-completion/completions"])
 AC_SUBST([BASH_COMPLETION_DIR])
 
 AC_CONFIG_FILES([
