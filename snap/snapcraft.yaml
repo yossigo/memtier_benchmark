@@ -1,0 +1,50 @@
+name: memtier-benchmark
+adopt-info: memtier-benchmark
+summary: A load generation and benchmarking tool for NoSQL databases.
+description: |
+  Memtier-benchmark is an open source load generation and benchmarking tool
+  for NoSQL databases. It offers the following:
+  * Support for both Redis and Memcache protocols (text and binary)
+  * Multi-threaded multi-client execution
+  * Many configuration options
+  * Read:Write ratio control
+  * Random and sequential key name pattern policies
+  * Random or ranged key expiration
+  * Redis cluster support
+  * TLS support
+
+grade: stable
+confinement: strict
+base: core20
+
+apps:
+  memtier-benchmark:
+    command: usr/local/bin/memtier_benchmark
+    completer: usr/local/share/bash-completion/completions/memtier_benchmark
+    plugs:
+      - network
+      - network-bind
+      - network-observe
+      - home
+
+parts:
+  memtier-benchmark:
+    plugin: autotools
+    source: .
+    autotools-configure-parameters:
+      - LIBEVENT_LIBS=-l:libevent.a
+      - LIBEVENT_OPENSSL_LIBS=-l:libevent_openssl.a
+    override-build: |
+      sed -i 's/memtier_benchmark/memtier-benchmark/g' bash-completion/memtier_benchmark
+      snapcraftctl build
+      VER=`sed -n 's/^.* PACKAGE_VERSION "\(.*\)"$/\1/g p' < config.h`
+      snapcraftctl set-version $VER
+    build-packages:
+      - build-essential
+      - autoconf
+      - automake
+      - libpcre3-dev
+      - libevent-dev
+      - pkg-config
+      - libssl-dev
+      - zlib1g-dev
