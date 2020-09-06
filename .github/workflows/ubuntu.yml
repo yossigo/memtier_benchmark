@@ -1,0 +1,33 @@
+name: Ubuntu PPA
+
+on:
+  release:
+    types: [created, published, edited]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+          sudo apt-get update && sudo apt-get install debhelper dput
+    - name: Setup GPG key
+      run: |
+          mkdir -p ~/.gnupg
+          echo "$GPG_SIGNING_KEY" | gpg --import
+      env:
+        GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+    - name: Build source package
+      run: |
+          for release in $RELEASES; do \
+              git reset --hard ;\
+              git clean -f -d -x ;\
+              sed -i "s/@RELEASE@/$release/g" debian/changelog ;\
+              dpkg-buildpackage -S ;\
+          done
+      env:
+        RELEASES: "xenial bionic cosmic disco eoan focal"
+    - name: Upload source packages
+      run: |
+          dput ppa:redislabs/memtier-benchmark ../*.changes
